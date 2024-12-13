@@ -1,0 +1,213 @@
+
+
+class Car:
+    def __init__(self, car_number, make, model, year, price_per_day):
+        self.car_number = car_number
+        self.make = make
+        self.model = model
+        self.year = year
+        self.price_per_day = price_per_day
+        self.is_available = True
+
+    def display_details(self):
+        print(f"Car {self.car_number} - {self.make} {self.model} ({self.year}) - Price per day: Php {self.price_per_day}")
+        print(f"Status: {'Available' if self.is_available else 'Rented'}")
+
+    def rent(self):
+        self.is_available = False
+
+    def return_car(self):
+        self.is_available = True
+
+
+class Customer:
+    def __init__(self, username, password, name, contact, email):
+        self.username = username
+        self.password = password
+        self.name = name
+        self.contact = contact
+        self.email = email
+
+
+class Admin:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
+# Sample data for testing
+admins = [Admin("royce", "royce123")]
+
+def main():
+    cars = [
+        Car(101, "Toyota", "Camry", 2022, 6500),
+        Car(102, "Toyota", "Avalon", 2022, 7000),
+        Car(103, "Toyota", "Land Cruiser", 2022, 9000),
+        Car(104, "Honda", "Civic", 2022, 3500),
+        Car(105, "Honda", "Accord", 2019, 5500),
+        Car(106, "Honda", "Honda Odyssey", 2022, 9000),
+        Car(107, "Hyundai", "Elantra", 2021, 6500),
+        Car(108, "Hyundai", "Accent", 2021, 5000),
+        Car(109, "Nissan", "Altima", 2021, 7300),
+        Car(110, "Nissan", "Sentra", 2023, 4000)
+    ]
+
+    customers = []
+    customer_count = 0
+
+    while True:
+        is_logged_in = False
+        while not is_logged_in:
+            print("\n***** WELCOME TO CAR RENTAL SYSTEM *****")
+            print("1. Admin Login")
+            print("2. Customer Login")
+            print("3. Customer Registration")
+            print("4. Exit")
+            choice = input("Choose your role: ")
+
+            if choice == '1':
+                admin_username = input("Admin Username: ")
+                admin_password = input("Admin Password: ")
+
+                is_admin_valid = any(
+                    admin.username == admin_username and admin.password == admin_password for admin in admins
+                )
+
+                if is_admin_valid:
+                    print("Admin login successful!")
+                    is_logged_in = True
+                    admin_menu(cars)
+                else:
+                    print("Invalid Admin credentials. Try again.")
+
+            elif choice == '2':
+                username = input("Enter username: ")
+                password = input("Enter password: ")
+
+                customer_found = False
+                for customer in customers:
+                    if customer.username == username and customer.password == password:
+                        customer_found = True
+                        print("Customer login successful!")
+                        is_logged_in = True
+                        customer_menu(cars, customer)
+                        break
+
+                if not customer_found:
+                    print("Invalid Customer credentials.")
+
+            elif choice == '3':
+                reg_username = input("Enter username: ")
+                reg_password = input("Enter password: ")
+                name = input("Enter fullname: ")
+                contact = input("Enter contact number: ")
+                email = input("Enter email: ")
+
+                customers.append(Customer(reg_username, reg_password, name, contact, email))
+                customer_count += 1
+                print("Customer registration successful!")
+
+            elif choice == '4':
+                print("Exiting...")
+                return
+
+            else:
+                print("Invalid choice, try again.")
+
+
+def admin_menu(cars):
+    while True:
+        print("\n***** Admin Menu *****")
+        print("1. View All Cars")
+        print("2. Manage Cars (Mark Rented/Available)")
+        print("3. Logout")
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            print("\nAll Cars:")
+            for car in cars:
+                car.display_details()
+                print("-----------------------------")
+
+        elif choice == '2':
+            car_number = int(input("Enter the car number to manage: "))
+            car_found = False
+
+            for car in cars:
+                if car.car_number == car_number:
+                    car_found = True
+                    print("Car found:")
+                    car.display_details()
+                    print("Current Status:", "Available" if car.is_available else "Rented")
+
+                    change_status = input("Would you like to change the status? (y/n): ")
+                    if change_status.lower() == 'y':
+                        car.is_available = not car.is_available
+                        print("Car status updated.")
+                    else:
+                        print("No changes made.")
+                    break
+
+            if not car_found:
+                print(f"Car number {car_number} not found.")
+
+        elif choice == '3':
+            print("Logging out...")
+            return
+
+        else:
+            print("Invalid choice. Please select a valid option.")
+
+
+def customer_menu(cars, current_customer):
+    while True:
+        print("\n***** Welcome to Car Rental System *****")
+        print("1. View Available Cars")
+        print("2. Rent a Car")
+        print("3. Logout")
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            print("\nAvailable Cars:")
+            available_cars = False
+            for car in cars:
+                if car.is_available:
+                    car.display_details()
+                    available_cars = True
+
+            if not available_cars:
+                print("No cars available at the moment.")
+
+        elif choice == '2':
+            car_number = int(input("Enter car number: "))
+            car_found = False
+
+            for car in cars:
+                if car.car_number == car_number:
+                    car_found = True
+                    if car.is_available:
+                        car.rent()
+                        print("CAR RENTED SUCCESFULLY!!\n--------------------------------------------------------")
+                        print("RENTAL DETAILS:\n--------------------------------------------------------")
+                        print(f"Name: {current_customer.name}")
+                        print(f"Contact: {current_customer.contact}")
+                        print(f"Email: {current_customer.email}")
+                        car.display_details()
+                        print("--------------------------------------------------------\nPlease visit the office to complete payment and details.")
+                    else:
+                        print(f"Sorry, Car {car_number} is already rented.")
+                    break
+
+            if not car_found:
+                print("Car not found. Please choose a valid car number.")
+
+        elif choice == '3':
+            print("Logging out...")
+            return
+
+        else:
+            print("Invalid choice, try again.")
+
+
+if __name__ == "__main__":
+    main()
